@@ -16,7 +16,8 @@ def load_wordnet_words():
       word_set.add(word)
   return word_set
 
-def filter_dictionary(dictionary, chars):
+def filter_dictionary(chars):
+  dictionary = load_wordnet_words()
   required = chars[0]
   allowed = set(chars)
   valid_words = []
@@ -35,14 +36,14 @@ def word_score_pairs(valid_words):
     result.append((i, game.get_word_points(i)))
   return result
 
-def greedy(chars, soln, goal_points, valid_words = None):
+def greedy_alg(chars, soln, goal_points, valid_words = None):
   if valid_words is None:
-    valid_words = filter_dictionary(load_wordnet_words(), chars)
-  word_score_pairs = word_score_pairs(valid_words)
-  word_score_pairs.sort(key = lambda x: x[1], reverse = True)
+    valid_words = filter_dictionary(chars)
+  pairs = word_score_pairs(valid_words)
+  pairs.sort(key = lambda x: x[1], reverse = True)
   chosen_words = []
   points_sofar = 0
-  for word, pt in word_score_pairs:
+  for word, pt in pairs:
     if word in soln:
       chosen_words.append(word)
       points_sofar += pt

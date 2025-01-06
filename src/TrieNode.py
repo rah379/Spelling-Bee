@@ -80,22 +80,26 @@ def dfs(node, trie, chars, soln, current_word, output, goal_points):
   (words, curr_score) = output
   if node.end_of_word:
     if current_word in soln and current_word not in words:
-      up_words = words.append(current_word)
+      words.append(current_word)
       up_score = curr_score + game.get_word_points(current_word)
-      output = (up_words, up_score)
+      output = (words, up_score)
       if up_score >= goal_points:
-        return (up_words, up_score)
+        return (words, up_score)
   for ch in chars:
     if ch in node.children:
-      dfs(
+      updated_output = (words, curr_score)
+      result = dfs(
         node = node.children[ch],
         trie = trie,
         chars = chars,
         soln = soln,
         current_word = current_word + ch,
-        output = output,
+        output = updated_output,
         goal_points = goal_points
       )
+      if result is not None:
+        return result
+  return (words, curr_score)
 
 def bfs(trie, chars, soln, output, goal_points):
   out_words, out_points = output
@@ -117,7 +121,7 @@ def bfs(trie, chars, soln, output, goal_points):
 
 
 
-def trieAlg(chars, solns, goal_points, trie = None, DFS = False):
+def trieAlg(chars, solns, goal_points, DFS, trie):
   # DFS is a flag for DFS (True) or BFS (False)
   if trie is None:
     trie = build_trie_from_chars(chars)
@@ -128,7 +132,7 @@ def trieAlg(chars, solns, goal_points, trie = None, DFS = False):
       chars = chars,
       soln = solns,
       current_word = "",
-      output = [],
+      output = ([], 0),
       goal_points = goal_points
     )
   else:
@@ -136,7 +140,7 @@ def trieAlg(chars, solns, goal_points, trie = None, DFS = False):
       trie = trie,
       chars = chars,
       soln = solns,
-      output = [],
+      output = ([], 0),
       goal_points = goal_points
     )
   return words, points

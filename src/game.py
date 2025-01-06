@@ -1,12 +1,14 @@
 import csv
 import time
+import TrieNode as tn
+import greedy as g
 # data: 2D list of characters, s.t. data[i][0] = day i's center letter, and 
 # data[i][1:7] = day i's outer letters
-data = list(csv.reader(open('data/letters.csv', newline = ''), delimiter = ' '))
+data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = ' '))
 
 # solutions: 2D list of words, s.t. solutions[i] = list of day i's solutions, with
 # pangrams first (varying number of pangrams prevents generalization)
-solutions = list(csv.reader(open('data/solutions.csv', newline = ''), delimiter = ' '))
+solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimiter = ' '))
 
 # Rules: 
 # 1. Word length n: 4 <= n <= 19
@@ -68,17 +70,41 @@ def get_word_points(word):
     points += 7
   return points
 
-def get_alg_solutions(alg, chars, soln, max_rank):
+def get_alg_solutions(alg, chars, soln, max_rank, 
+                      trie_alg = False, greedy = False, precompute = False, DFS = False):
   total_possible = count_total_points(soln)
   each_rank_points = get_rank_points(total_possible)
   words_result = [[]]
   points_result = [0]
   times = [0]
   for r in range(1, max_rank):
-    start = time.time()
-    words, points = alg(chars, soln, each_rank_points[r])
-    end = time.time()
-    words_result.append(words)
-    points_result.append(points)
-    times.append(end - start)
+    if trie_alg == False and greedy == False:
+      start = time.time()
+      words, points = alg(chars, soln, each_rank_points[r])
+      end = time.time()
+      words_result.append(words)
+      points_result.append(points)
+      times.append(end - start)
+    elif trie_alg == True and greedy == False:
+      if precompute:
+        trie = tn.build_trie_from_chars(chars)
+      else:
+        trie = None
+      start = time.time()
+      words, points = alg(chars, soln, each_rank_points[r], DFS, trie)
+      end = time.time()
+      words_result.append(words)
+      points_result.append(points)
+      times.append(end - start)
+    else:
+      if precompute: 
+        valid_words = g.filter_dictionary(chars)
+      else:
+        valid_words = None
+      start = time.time()
+      words, points = alg(chars, soln, each_rank_points[r], valid_words)
+      end = time.time()
+      words_result.append(words)
+      points_result.append(points)
+      times.append(end - start)
   return words_result, points_result, times
