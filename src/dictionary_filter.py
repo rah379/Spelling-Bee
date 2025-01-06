@@ -96,13 +96,20 @@ def dictionary_filter_prime(chars, solns, goal_points):
 
 
 # Third approach- stop building after meeting our heuristic of >= k% scored
-def stop_at_success(soln, goal_points):
+def stop_at_success(chars, soln, goal_points):
+  char_set = set(chars)
   total_points = 0
   soln_words = []
   soln_set = set(soln)
   for syn in wn.all_synsets():
     for lemma in syn.lemma_names():
       word = lemma.lower()
+      # run through basic filters to eliminate majority of words first:
+      if "_" in word or "-" in word or "'" in word:
+        continue
+      if chars[0] not in word or not (set(word).issubset(char_set)):
+        continue
+      # test if word is a solution
       if word in soln_set:
         total_points += game.get_word_points(word)
         soln_words.append(word)

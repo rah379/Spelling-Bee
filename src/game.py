@@ -8,7 +8,6 @@ data = list(csv.reader(open('data/letters.csv', newline = ''), delimiter = ' '))
 # pangrams first (varying number of pangrams prevents generalization)
 solutions = list(csv.reader(open('data/solutions.csv', newline = ''), delimiter = ' '))
 
-
 # Rules: 
 # 1. Word length n: 4 <= n <= 19
 # 2. Must include "center letter"
@@ -72,10 +71,14 @@ def get_word_points(word):
 def get_alg_solutions(alg, chars, soln, max_rank):
   total_possible = count_total_points(soln)
   each_rank_points = get_rank_points(total_possible)
-  vals = [([], 0, 0)]
+  words_result = [[]]
+  points_result = [0]
+  times = [0]
   for r in range(1, max_rank):
     start = time.time()
     words, points = alg(chars, soln, each_rank_points[r])
     end = time.time()
-    vals.append((words, points, end - start))
-  return vals
+    words_result.append(words)
+    points_result.append(points)
+    times.append(end - start)
+  return words_result, points_result, times
