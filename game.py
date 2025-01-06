@@ -1,7 +1,5 @@
 import csv
 import time
-import brute_force as bf
-import dictionary_filter as df
 # data: 2D list of characters, s.t. data[i][0] = day i's center letter, and 
 # data[i][1:7] = day i's outer letters
 data = list(csv.reader(open('data/letters.csv', newline = ''), delimiter = ' '))
