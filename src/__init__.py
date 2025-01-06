@@ -29,8 +29,8 @@ def run_on_all(heuristic, n, trie = False, greedy = False, precompute = False, D
     t_arr = np.array(t)
     points_avg += p
     times_avg += t
-  points_avg *= 1/15
-  times_avg *= 1/15
+  points_avg *= 1/14
+  times_avg *= 1/14
   return points_avg, times_avg
 
 

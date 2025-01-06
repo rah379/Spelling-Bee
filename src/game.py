@@ -10,6 +10,8 @@ data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = '
 # pangrams first (varying number of pangrams prevents generalization)
 solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimiter = ' '))
 
+
+
 # Rules: 
 # 1. Word length n: 4 <= n <= 19
 # 2. Must include "center letter"
