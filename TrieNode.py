@@ -1,7 +1,8 @@
 import nltk
 from nltk.corpus import wordnet
 import collections
-
+from collections import deque
+import game
 
 class TrieNode:
   def __init__(self):
@@ -27,7 +28,7 @@ class Trie:
         return False
     return current.is_end
 
-# This is precomputed, to reduce runtime
+# Potentially precomputed, to reduce runtime
 def build_trie_from_chars(chars):
   char_set = set(chars)
   trie = Trie()
@@ -74,3 +75,70 @@ def search(trie, chars):
     results = results
   )
   return results
+
+def dfs(node, trie, chars, soln, current_word, output, goal_points):
+  (words, curr_score) = output
+  if node.end_of_word:
+    if current_word in soln and current_word not in words:
+      up_words = words.append(current_word)
+      up_score = curr_score + game.get_word_points(current_word)
+      output = (up_words, up_score)
+      if up_score >= goal_points:
+        return (up_words, up_score)
+  for ch in chars:
+    if ch in node.children:
+      dfs(
+        node = node.children[ch],
+        trie = trie,
+        chars = chars,
+        soln = soln,
+        current_word = current_word + ch,
+        output = output,
+        goal_points = goal_points
+      )
+
+def bfs(trie, chars, soln, output, goal_points):
+  out_words, out_points = output
+  queue = deque()
+  queue.append((trie.root, ""))
+  while queue and out_points < goal_points:
+    node, prefix = queue.popleft()
+    if node.end_of_word:
+      if prefix not in out_words and prefix in soln:
+        out_words.append(prefix)
+        out_points += game.get_word_points(prefix)
+        if out_points >= goal_points:
+          break
+    for ch, child_node in node.children.items():
+      if ch in chars:
+        queue.append((child_node, prefix + ch))
+  return output
+
+
+
+
+def trieAlg(chars, solns, goal_points, trie = None, DFS = False):
+  # DFS is a flag for DFS (True) or BFS (False)
+  if trie is None:
+    trie = build_trie_from_chars(chars)
+  if DFS:
+    words, points = dfs(
+      node = trie.root,
+      trie = trie,
+      chars = chars,
+      soln = solns,
+      current_word = "",
+      output = [],
+      goal_points = goal_points
+    )
+  else:
+    words, points = bfs(
+      trie = trie,
+      chars = chars,
+      soln = solns,
+      output = [],
+      goal_points = goal_points
+    )
+  return words, points
+
+

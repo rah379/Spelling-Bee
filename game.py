@@ -72,10 +72,12 @@ def get_word_points(word):
   return points
 
 def get_alg_solutions(alg, chars, soln, max_rank):
+  total_possible = count_total_points(soln)
+  each_rank_points = get_rank_points(total_possible)
   vals = [([], 0, 0)]
   for r in range(1, max_rank):
     start = time.time()
-    words, points = alg(chars, soln, r)
+    words, points = alg(chars, soln, each_rank_points[r])
     end = time.time()
     vals.append((words, points, end - start))
   return vals

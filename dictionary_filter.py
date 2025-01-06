@@ -38,9 +38,7 @@ def filter_words_prime(word_set, soln):
       valid_words.append(w)
   return valid_words
 
-def dictionary_filter(chars, solns, goal_rank):
-  total_possible_points = game.count_total_points(solns)
-  each_rank_points = game.get_rank_points(total_possible_points)
+def dictionary_filter(chars, solns, goal_points):
   total_points = 0
   word_set = build_wordnet_dict()
   valid_words = filter_words(word_set, chars)
@@ -50,7 +48,7 @@ def dictionary_filter(chars, solns, goal_rank):
     if word in soln_set:
       total_points += game.get_word_points(word)
       solution_words.append(word)
-      if(total_points >= each_rank_points[goal_rank]):
+      if(total_points >= goal_points):
         break
   return solution_words, total_points
 
@@ -80,9 +78,7 @@ def build_minimal_wordnet(chars):
       word_set.add(word)
   return word_set
 
-def dictionary_filter_prime(chars, solns, goal_rank):
-  total_possible_points = game.count_total_points(solns)
-  each_rank_points = game.get_rank_points(total_possible_points)
+def dictionary_filter_prime(chars, solns, goal_points):
   total_points = 0
   valid_words = build_minimal_wordnet(chars)
   soln_set = set(solns)
@@ -91,7 +87,7 @@ def dictionary_filter_prime(chars, solns, goal_rank):
     if word in soln_set:
       total_points += game.get_word_points(word)
       solution_words.append(word)
-      if(total_points >= each_rank_points[goal_rank]):
+      if(total_points >= goal_points):
         break
   return solution_words, total_points
 
@@ -100,9 +96,7 @@ def dictionary_filter_prime(chars, solns, goal_rank):
 
 
 # Third approach- stop building after meeting our heuristic of >= k% scored
-def stop_at_success(soln, goal_rank):
-  total_possible_points = game.count_total_points(soln)
-  each_rank_points = game.get_rank_points(total_possible_points)
+def stop_at_success(soln, goal_points):
   total_points = 0
   soln_words = []
   soln_set = set(soln)
@@ -112,7 +106,7 @@ def stop_at_success(soln, goal_rank):
       if word in soln_set:
         total_points += game.get_word_points(word)
         soln_words.append(word)
-      if total_points >= each_rank_points[goal_rank]:
+      if (total_points >= goal_points):
         return soln_words, total_points
   return [], -1 #indicates we don't have the correct words in wordnet, unlikely
 
