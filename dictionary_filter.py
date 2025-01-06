@@ -99,7 +99,7 @@ def dictionary_filter_prime(chars, solns, goal_rank):
 
 
 
-# Third approach- stop building after meeting our heuristic of >= k% scored! 
+# Third approach- stop building after meeting our heuristic of >= k% scored
 def stop_at_success(soln, goal_rank):
   total_possible_points = game.count_total_points(soln)
   each_rank_points = game.get_rank_points(total_possible_points)
@@ -114,4 +114,7 @@ def stop_at_success(soln, goal_rank):
         soln_words.append(word)
       if total_points >= each_rank_points[goal_rank]:
         return soln_words, total_points
-  return [], -1
+  return [], -1 #indicates we don't have the correct words in wordnet, unlikely
+
+
+
