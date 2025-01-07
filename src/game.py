@@ -4,11 +4,11 @@ import TrieNode as tn
 import greedy as g
 # data: 2D list of characters, s.t. data[i][0] = day i's center letter, and 
 # data[i][1:7] = day i's outer letters
-data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = ' '))
+# data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = ' '))
 
 # solutions: 2D list of words, s.t. solutions[i] = list of day i's solutions, with
 # pangrams first (varying number of pangrams prevents generalization)
-solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimiter = ' '))
+# solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimiter = ' '))
 
 
 
@@ -39,6 +39,8 @@ solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimi
 # 2. These percentages are rounded, with some massaging (we'll just round)
 # 3. Generally, the human "win condition" is getting the Genius rank
 
+rank_percentages = [0, 0.02, 0.05, 0.08, 0.15, 0.25, 0.40, 0.50, 0.70, 1]
+
 
 def count_total_points(sol_list):
   possible_points = 0
@@ -53,11 +55,8 @@ def count_total_points(sol_list):
       possible_points += 7
   return possible_points
 
-def get_rank_points(total_available):
-  rank_points = []
-  rank_percentages = [0, 0.02, 0.05, 0.08, 0.15, 0.25, 0.40, 0.50, 0.70, 1]
-  for i in rank_percentages:
-    rank_points.append(round(total_available * i))
+def get_all_rank_points(total_available):
+  rank_points = [round(total_available * i) for i in rank_percentages]
   return rank_points
 
 def get_word_points(word):
@@ -72,10 +71,32 @@ def get_word_points(word):
     points += 7
   return points
 
+def use_bf(bf_alg, chars, soln, rank, priority = None):
+  total_possible = count_total_points(soln)
+  rank_points = round(rank_percentages[rank] * total_possible)
+  if priority is None:
+    start = time.time()
+    words, points = bf_alg(chars, soln, rank_points)
+    end = time.time()
+  else:
+    start = time.time()
+    words, points = bf_alg(chars, soln, rank_points, priority)
+    end = time.time()
+  return words, points, end - start
+
+
+
+
+
+
+
+
+
+
 def get_alg_solutions(alg, chars, soln, max_rank, 
                       trie_alg = False, greedy = False, precompute = False, DFS = False):
   total_possible = count_total_points(soln)
-  each_rank_points = get_rank_points(total_possible)
+  each_rank_points = get_all_rank_points(total_possible)
   words_result = [[]]
   points_result = [0]
   times = [0]
