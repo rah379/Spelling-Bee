@@ -29,31 +29,105 @@ def generate_bees():
       yield [first_letter] + sorted(combo)
 
 
+def generate_pangrams():
+  pangram_set = set()
+  sets_of_chars_seen = set()
+  for syn in wn.all_synsets():
+    for lemma in syn.lemma_names():
+      if "_" in lemma:
+        continue
+      word = lemma.lower()
+      if "-" in word or "'" in word:
+        continue
+      if not (4 <= len(word) <= 17):
+        continue
+      word_set = frozenset(word)
+      if len(word_set) != 7:
+        continue
+      if word_set in sets_of_chars_seen:
+        continue
+      sets_of_chars_seen.add(word_set)
+      pangram_set.add((word, word_set))
+  return pangram_set
 
-freq_map = np.zeros(26)
-first_map = np.zeros(26)
-for i in range(0, 14):
-  for j in range(0, 7):
-    char = data[i][j]
-    idx = string.ascii_lowercase.index(char)
-    if j == 0:
-      first_map[idx] += 1
-    freq_map[idx] += 1
+# p_set is a set of tuples (pangram, word_frozenset)
+def filter_assumptions(p_set):
+  out_set = set()
+  vowel_set_no_y = set(('a', 'e', 'i', 'o', 'u'))
+  for pangram, word_frozenset in p_set:
+    # assumption 1: at least two vowels (no y)
+    # assumption 2: no more than three vowels (with y)
+    min_vowels = 0
+    max_vowels = 0
+    for char in word_frozenset:
+      if char in vowel_set_no_y:
+        min_vowels += 1
+        max_vowels += 1
+      if char == 'y':
+        max_vowels += 1
+    if min_vowels > 1 and max_vowels < 4:
+      out_set.add((pangram, word_frozenset))
+  return out_set
 
-x_axis = np.array(list(string.ascii_lowercase))
-total_letters = freq_map.sum()
-freq_map = freq_map / total_letters
-first_map = first_map / first_map.sum()
-real_values = [8.2, 1.5, 2.8, 4.3, 12.7, 2.2, 2.0, 6.1, 7.0, 0.15, 0.77, 4.0, 
-                        2.4, 6.7, 7.5, 1.9, 0.095, 6.0, 9.1, 
-                        2.8, 0.98, 2.4, 0.15, 2.0, 0.074]
-alphabet = list(string.ascii_lowercase)
-alphabet.remove('s')
-value_alph_tuple = [(real_values[i], alphabet[i]) for i in range(0, 25)]
-sorted_by_freq = sorted(value_alph_tuple, key = lambda x:x[0])
-print(sorted_by_freq)
+def generate_bees(p_set):
+  with open('src/data/generated_bees.csv', 'w', newline = '') as csvfile_bee:
+    with open('src/data/generated_bees_solutions.csv', 'w', newline = '') as csvfile_solutions:
+      for pangram, word_frozenset in p_set:
+        spamwriter_bee = csv.writer(csvfile_bee, delimiter = ' ')
+        spamwriter_solution = csv.writer(csvfile_solutions, delimiter = ' ')
+        word_list = list(word_frozenset)
+        for i in range(0, 7):
+          all_but_i = word_list[:i] + word_list[i + 1:]
+          at_i = word_list[i]
+          spamwriter_bee.writerow([at_i] + all_but_i) # write all seven solutions
+          spamwriter_solution.writerow([pangram]) # write the pangram for each row
 
 
+def fill_in_new_files():
+  p_set = generate_pangrams()
+  fit_assumptions = filter_assumptions(p_set)
+  generate_bees(fit_assumptions)
+
+
+# fill_in_new_files() only needs to be ran the once! 
+
+
+
+# freq_map = np.zeros(26)
+# first_map = np.zeros(26)
+# for i in range(0, 14):
+#   for j in range(0, 7):
+#     char = data[i][j]
+#     idx = string.ascii_lowercase.index(char)
+#     if j == 0:
+#       first_map[idx] += 1
+#     freq_map[idx] += 1
+
+# x_axis = np.array(list(string.ascii_lowercase))
+# total_letters = freq_map.sum()
+# freq_map = freq_map / total_letters
+# first_map = first_map / first_map.sum()
+# real_values = [8.2, 1.5, 2.8, 4.3, 12.7, 2.2, 2.0, 6.1, 7.0, 0.15, 0.77, 4.0, 
+#                         2.4, 6.7, 7.5, 1.9, 0.095, 6.0, 9.1, 
+#                         2.8, 0.98, 2.4, 0.15, 2.0, 0.074]
+# alphabet = list(string.ascii_lowercase)
+# alphabet.remove('s')
+# lst = freq_map.tolist()
+# lst = lst[:18] + lst[19:]
+# freq_alph_tuple = [(lst[i], alphabet[i]) for i in range(0, 25)]
+# SEEN_sorted_by_freq = sorted(freq_alph_tuple, key = lambda x: x[0])
+
+# value_alph_tuple = [(real_values[i], alphabet[i]) for i in range(0, 25)]
+# REAL_sorted_by_freq = sorted(value_alph_tuple, key = lambda x:x[0])
+
+# cmp_orders = [(REAL_sorted_by_freq[i][1], SEEN_sorted_by_freq[i][1]) for i in range(0, 25)]
+# diff_order = []
+# for i in range(0, 25):
+#   real, seen = cmp_orders[i]
+#   if real != seen:
+#     diff_order.append((real, seen, i))
+
+# print(diff_order)
 
 
 
