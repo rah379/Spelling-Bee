@@ -10,17 +10,6 @@ import string
 data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = ' '))
 solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimiter = ' '))
 
-# total_potential_points_dist = np.zeros(14)
-# for i in range(0, 14):
-#   total_potential_points_dist[i] = game.count_total_points(solutions[i])
-
-# plt.figure()
-# plt.hist(total_potential_points_dist, bins = 'auto', edgecolor = 'black', alpha = 0.7)
-# plt.title('Distribution of Total Potential Points')
-# plt.xlabel('Total Potential Points')
-# plt.ylabel('Frequency')
-# plt.show()
-
 def generate_bees():
   letters = list(string.ascii_lowercase)
   for i, first_letter in enumerate(letters):
@@ -92,12 +81,12 @@ def fill_in_new_files():
 # fill_in_new_files() -> only needs to be ran the once
 
 generated_data = list(csv.reader(open('src/data/generated_bees.csv', newline = ''), delimiter = ' '))
-generated_pangrams = list(csv.reader(open('src/data/generated_bees_solutions.csv', newline = ''), delimiter = ' '))
+generated_solutions = list(csv.reader(open('src/data/generated_bees_solutions.csv', newline = ''), delimiter = ' '))
 
 
-# Fill in generated_bees_solutions.csv with all possible solutions (ideally)
 
 
+# Filling in src/data/generated_bees_solutions.csv
 # Build wordnet set of all possible solution words
 def build_wordnet_set():
   word_set = set()
@@ -117,9 +106,9 @@ def build_wordnet_set():
 
 
 def fill_in_all_solutions(word_set):
-  with open('src/data/test_writing.csv', 'w', newline = '') as csvfile_solutions:
+  with open('src/data/generated_bees_solutions.csv', 'w', newline = '') as csvfile_solutions:
     for i in range(0, len(generated_data)):
-      solution_words = [generated_pangrams[i][0]] #pangrams first
+      solution_words = [generated_solutions[i][0]] #pangrams first
       chars = generated_data[i]
       required = chars[0]
       allowed_letters = set(chars)
@@ -131,14 +120,75 @@ def fill_in_all_solutions(word_set):
       spamwriter.writerow(solution_words)
 
 
-word_set = build_wordnet_set()
-fill_in_all_solutions(word_set)
+# word_set = build_wordnet_set()
+# fill_in_all_solutions(word_set) -> only needed to do once, to fill src/data/generated_bees_solutions.csv
+
+
+# Eliminating Elements of Dataset that are outrageous
+def plot_num_solutions(generated_data, generated_solutions):
+  num_games = len(generated_data)
+  total_words_solutions = np.zeros(num_games)
+  for i in range(0, num_games):
+    total_words_solutions[i] = len(generated_solutions[i])
+  plt.figure()
+  plt.hist(total_words_solutions, bins = 'auto', edgecolor = 'black', alpha = 0.7)
+  plt.title('Distribution of Number of Solution Words')
+  plt.xlabel('Total Solution Words')
+  plt.ylabel('Frequency')
+  plt.show()
+
+def eliminate_too_many():
+  with open('src/data/out_solns.csv', 'w', newline = '') as res_one:
+    with open('src/data/out_bees.csv', 'w', newline = '') as res_two:
+      writer_one = csv.writer(res_one, delimiter = ' ')
+      writer_two = csv.writer(res_two, delimiter = ' ')
+      for i in range(0, len(generated_data)):
+        if len(generated_solutions[i]) < 60:
+          writer_one.writerow(generated_solutions[i])
+          writer_two.writerow(generated_data[i])
+
+# eliminate_too_many() -> only needed to be ran once
+generated_data = list(csv.reader(open('src/data/smaller_gen.csv', newline = ''), delimiter = ' '))
+generated_solutions = list(csv.reader(open('src/data/smaller_gen_solns.csv', newline = ''), delimiter = ' '))
+plot_num_solutions(generated_data, generated_solutions)
+
+
+
+# Point Analysis
+# Distribution of Total Potential Points
+def plot_pot_points_dist():
+  num_games = len(generated_data)
+  total_potential_points_dist = np.zeros(num_games)
+  for i in range(0, num_games):
+    total_potential_points_dist[i] = game.count_total_points(generated_solutions[i])
+  plt.figure()
+  plt.hist(total_potential_points_dist, bins = 'auto', edgecolor = 'black', alpha = 0.7)
+  plt.title('Distribution of Total Potential Points')
+  plt.xlabel('Total Potential Points')
+  plt.ylabel('Frequency')
+  plt.show()
 
 
 
 
 
 
+
+
+
+
+## ALL CODE BELOW IS FOR UNNECESSARY SECTION 3.2.1
+
+# total_potential_points_dist = np.zeros(14)
+# for i in range(0, 14):
+#   total_potential_points_dist[i] = game.count_total_points(solutions[i])
+
+# plt.figure()
+# plt.hist(total_potential_points_dist, bins = 'auto', edgecolor = 'black', alpha = 0.7)
+# plt.title('Distribution of Total Potential Points')
+# plt.xlabel('Total Potential Points')
+# plt.ylabel('Frequency')
+# plt.show()
 
 
 
