@@ -148,10 +148,18 @@ def eliminate_too_many():
           writer_two.writerow(generated_data[i])
 
 # eliminate_too_many() -> only needed to be ran once
-generated_data = list(csv.reader(open('src/data/smaller_gen.csv', newline = ''), delimiter = ' '))
-generated_solutions = list(csv.reader(open('src/data/smaller_gen_solns.csv', newline = ''), delimiter = ' '))
-plot_num_solutions(generated_data, generated_solutions)
 
+def eliminate_too_few():
+  with open('src/data/out_solns.csv', 'w', newline = '') as res_one:
+    with open('src/data/out_bees.csv', 'w', newline = '') as res_two:
+      writer_one = csv.writer(res_one, delimiter = ' ')
+      writer_two = csv.writer(res_two, delimiter = ' ')
+      for i in range(0, len(generated_data)):
+        if len(generated_solutions[i]) > 19:
+          writer_one.writerow(generated_solutions[i])
+          writer_two.writerow(generated_data[i])
+
+# eliminate_too_few() -> only needed to be ran once
 
 
 # Point Analysis
@@ -168,7 +176,7 @@ def plot_pot_points_dist():
   plt.ylabel('Frequency')
   plt.show()
 
-
+# plot_pot_points_dist()
 
 
 
