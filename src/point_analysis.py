@@ -89,7 +89,57 @@ def fill_in_new_files():
   generate_bees(fit_assumptions)
 
 
-# fill_in_new_files() only needs to be ran the once! 
+# fill_in_new_files() -> only needs to be ran the once
+
+generated_data = list(csv.reader(open('src/data/generated_bees.csv', newline = ''), delimiter = ' '))
+generated_pangrams = list(csv.reader(open('src/data/generated_bees_solutions.csv', newline = ''), delimiter = ' '))
+
+
+# Fill in generated_bees_solutions.csv with all possible solutions (ideally)
+
+
+# Build wordnet set of all possible solution words
+def build_wordnet_set():
+  word_set = set()
+  for syn in wn.all_synsets():
+    for lemma in syn.lemma_names():
+      if "_" in lemma:
+        continue
+      word = lemma.lower()
+      if "-" in word or "'" in word:
+        continue
+      if not (4 <= len(word) <= 19):
+        continue
+      if len(set(word)) > 7:
+        continue
+      word_set.add(word)
+  return word_set
+
+
+def fill_in_all_solutions(word_set):
+  with open('src/data/test_writing.csv', 'w', newline = '') as csvfile_solutions:
+    for i in range(0, len(generated_data)):
+      solution_words = [generated_pangrams[i][0]] #pangrams first
+      chars = generated_data[i]
+      required = chars[0]
+      allowed_letters = set(chars)
+      for word in word_set:
+        if (not set(word).issubset(allowed_letters)) or required not in word:
+          continue
+        solution_words.append(word)
+      spamwriter = csv.writer(csvfile_solutions, delimiter = ' ')
+      spamwriter.writerow(solution_words)
+
+
+word_set = build_wordnet_set()
+fill_in_all_solutions(word_set)
+
+
+
+
+
+
+
 
 
 
