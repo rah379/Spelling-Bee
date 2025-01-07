@@ -38,7 +38,6 @@ def optimized_bf(chars, solutions, goal_points, length_priority = None):
   solution_set = set(solutions)
   found_words = set()
   points_earned = 0
-  # First optimization: Use different length priorities 5>6>7>8>4 first
   for length in length_priority:
     for next_word in cycle(chars, length):
       if next_word in solution_set:
