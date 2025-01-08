@@ -76,8 +76,6 @@ def naive_df_prime(chars, soln, goal_points, precomputation, dict = None): # dic
       points_earned += game.get_word_points(word)
     if points_earned >= goal_points:
       found_words_lst = list(found_words)
-      print(precomputation, found_words_lst, chars)
       return (found_words_lst, points_earned)
   found_words_lst = list(found_words)
-  print(precomputation, found_words_lst, chars)
   return (found_words_lst, points_earned)
