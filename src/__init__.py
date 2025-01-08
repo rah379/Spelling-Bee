@@ -1,7 +1,5 @@
 import brute_force as bf
 import dictionary_filter as df
-import greedy
-import TrieNode as tn
 import game as g
 import matplotlib.pyplot as plt
 import numpy as np
@@ -107,25 +105,24 @@ def benchmark_df(df_alg, data, solution, precompute, dicts):
   return np.stack((avg_word_length / len(data), avg_words_used / len(data), 
                     point_vals / len(data), time_vals / len(data)))
 
-
-
 precomputations = [0, 1, 2, 3, 4]
-def plot_naive_precomps():
-  zero_dicts = [None] * len(data)
-  one_dicts = []
-  two_dicts = []
-  three_dicts = []
-  four_dicts = []
+zero_dicts = [None] * len(data)
+one_dicts = []
+two_dicts = []
+three_dicts = []
+four_dicts = []
+def do_all_precomps():
   for i in data:
-    one_dicts.append(df.build_wordnet_dict(0, i))
-    two_dicts.append(df.build_wordnet_dict(0, i))
-    three_dicts.append(df.build_wordnet_dict(0, i))
-    four_dicts.append(df.build_wordnet_dict(0, i))
-  s0 = benchmark_df(df.naive_df, data, solutions, 0, zero_dicts)
-  s1 = benchmark_df(df.naive_df, data, solutions, 1, one_dicts)
-  s2 = benchmark_df(df.naive_df, data, solutions, 2, two_dicts)
-  s3 = benchmark_df(df.naive_df, data, solutions, 3, three_dicts)
-  s4 = benchmark_df(df.naive_df, data, solutions, 4, four_dicts)
+    one_dicts.append(df.build_dict(1, i))
+    two_dicts.append(df.build_dict(2, i))
+    three_dicts.append(df.build_dict(3, i))
+    four_dicts.append(df.build_dict(4, i))
+def plot_naive_precomps():
+  s0 = benchmark_df(df.naive_df_prime, data, solutions, 0, zero_dicts)
+  s1 = benchmark_df(df.naive_df_prime, data, solutions, 1, one_dicts)
+  s2 = benchmark_df(df.naive_df_prime, data, solutions, 2, two_dicts)
+  s3 = benchmark_df(df.naive_df_prime, data, solutions, 3, three_dicts)
+  s4 = benchmark_df(df.naive_df_prime, data, solutions, 4, four_dicts)
   all_stacks = [s0, s1, s2, s3, s4]
   titles = ['Naive w/ Precomp 0', 'Naive w/ Precomp 1', 'Naive w/ Precomp 2', 
             'Naive w/ Precomp 3', 'Naive w/ Precomp 4']
@@ -138,124 +135,3 @@ def plot_naive_precomps():
 # plot_sep([s], ['Naive Brute Force'], ['b'])
 # plot_bf_differences()
 # plot_naive_precomps()
-
-
-
-def plot_df_differences():
-  return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def deprecated(data, solutions):
-  n = 9 # 'genius' score
-  ranks_percentages = [0, 2, 5, 8, 15, 25, 40, 50, 70, 100]
-  x_axis = np.array(ranks_percentages[0:n])
-
-
-  def run_on_all(heuristic, n, trie = False, greedy = False, precompute = False, DFS = False):
-    points_avg = np.zeros(n)
-    times_avg = np.zeros(n)
-    for i in range(0, 14):
-      chars = data[i]
-      solns = solutions[i]
-      if not trie and not greedy:
-        w, p, t = g.get_alg_solutions(heuristic, chars, solns, n)
-      elif trie and not greedy:
-        w, p, t = g.get_alg_solutions(heuristic, chars, solns, n, True, greedy, precompute, DFS)
-      else:
-        w, p, t = g.get_alg_solutions(heuristic, chars, solns, n, False, greedy, precompute)
-      p_arr = np.array(p)
-      t_arr = np.array(t)
-      points_avg += p
-      times_avg += t
-    points_avg *= 1/14
-    times_avg *= 1/14
-    return points_avg, times_avg
-
-
-
-  # First method: Brute Forcing (the code below works)
-  bf_points, bf_times = run_on_all(bf.brute_force_dprime, n)
-
-  # Second method: Straight Dictionary Filtering
-  points_df, times_df = run_on_all(df.stop_at_success, n)
-
-  # Third method(s): Trie Node
-  # 3a: Don't Precompute Trie, DFS:
-  no_prec_dfs_points, no_prec_dfs_times = run_on_all(tn.trieAlg, 
-                                                    n, trie = True, 
-                                                    precompute = False, 
-                                                    DFS = True)
-  # 3b: Don't Precompute Trie, BFS:
-  no_prec_bfs_points, no_prec_bfs_times = run_on_all(tn.trieAlg, 
-                                                    n, trie = True,
-                                                    precompute = False,
-                                                    DFS = False)
-  # 3c: Precompute, DFS: 
-  prec_dfs_points, prec_dfs_times = run_on_all(tn.trieAlg, 
-                                                    n, trie = True, 
-                                                    precompute = True, 
-                                                    DFS = True)
-  # 3d: Precompute, BFS:
-  prec_bfs_points, prec_bfs_times = run_on_all(tn.trieAlg, 
-                                                    n, trie = True,
-                                                    precompute = True,
-                                                    DFS = False)
-
-
-  # Fourth method(s): Greedy Dictionary
-  # 4a: Don't precompute filtered dictionary:
-  no_prec_greedy_pts, no_prec_greedy_times = run_on_all(greedy.greedy_alg, n,
-                                                        trie = False,
-                                                        greedy = True)
-
-  # 4b: precompute filtered dictionary: 
-  prec_greedy_pts, prec_greedy_times = run_on_all(greedy.greedy_alg, n, 
-                                                  trie = False, greedy = True,
-                                                  precompute = True)
-
-
-
-
-
-
-
-  plt.plot(x_axis, bf_times, color = 'r', label = 'Brute Force')
-  plt.plot(x_axis, times_df, color = 'b', label = 'Dictionary Filtering')
-  plt.plot(x_axis, no_prec_dfs_times, color = 'g', label = 'No Precompute DFS Trie')
-  plt.plot(x_axis, no_prec_bfs_times, color = 'c', label = 'No Precompute BFS Trie')
-  plt.plot(x_axis, prec_dfs_times, color = 'm', label = 'Precompute DFS Trie')
-  plt.plot(x_axis, prec_bfs_times, color = 'y', label = 'Precompute BFS Trie')
-  plt.plot(x_axis, no_prec_greedy_times, color = 'k', label = 'No Precompute Greedy')
-  plt.plot(x_axis, prec_greedy_times, color = 'tab:orange', label = 'Precompute Greedy')
-  plt.xlabel("Rank (Percentage of Max Possible Points)")
-  plt.ylabel("Time (s)")
-  plt.title("Comparing Solving Method Times")
-  plt.legend()
-  plt.show()
