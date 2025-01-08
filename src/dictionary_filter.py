@@ -1,9 +1,96 @@
 import nltk
 from nltk.corpus import wordnet as wn
+from nltk.corpus import words
 import game
+import string
 # Second: Dictionary Filtering, starting with the "entire" dictionary, and filtering
 # words based on the rules of the game
 
+ascii_set = set(string.ascii_lowercase)
+word_set = set(words.words())
+
+def prec_filter_word(word, precomputation, chars):
+  """
+  Precondition: precomputation in {2, 3, 4}
+  """
+  set_of_word = set(word)
+  is_ascii = set_of_word.issubset(ascii_set)
+  char_set = set(chars)
+  if precomputation == 2: #check for non-ascii
+    return is_ascii
+  char_set = set(chars)
+  is_subset = set_of_word.issubset(char_set)
+  if precomputation == 3: #check character set
+    return is_ascii and is_subset
+  required = chars[0]
+  is_pot_soln = (required in set_of_word) and is_ascii and is_subset and (4 <= len(word) <= 19)
+  return is_pot_soln
+
+
+def build_wordnet_dict(precomputation, chars):
+  for syn in wn.all_synsets():
+    for lemma in syn.lemma_names():
+      word = lemma.lower()
+      if precomputation < 2:
+        word_set.add(word)
+      elif prec_filter_word(word, precomputation, chars):
+        word_set.add(word)
+  return word_set
+
+
+def naive_df(chars, soln, goal_points, precomputation, dict = None): # dict = None when precomputation = 0
+  if dict is None: #precomputation = 0
+    dict = build_wordnet_dict(precomputation, chars)
+  solution_set = set(soln)
+  found_words = set()
+  points_earned = 0
+  required = chars[0]
+  char_set = set(chars)
+  for word in dict: 
+    if precomputation == 0 or precomputation == 1: # dicts are entire corpus
+      word_toset = set(word)
+      is_ascii = word_toset.issubset(ascii_set)
+      if word_toset.issubset(char_set) and is_ascii and required in word_toset and (4 <= len(word) <= 19):
+        if word in solution_set:
+          found_words.add(word)
+          points_earned += game.get_word_points(word)
+      if points_earned >= goal_points:
+        found_words_lst = list(found_words)
+        return (found_words_lst, points_earned)
+    if precomputation == 2: # Given, all words are ascii
+      word_toset = set(word)
+      if word_toset.issubset(char_set) and required in word_toset and (4 <= len(word) <= 19):
+        if word in solution_set:
+          found_words.add(word)
+          points_earned += game.get_word_points(word)
+      if points_earned >= goal_points:
+        found_words_lst = list(found_words)
+        return (found_words_lst, points_earned)
+    if precomputation == 3: # Given, all words are ascii and only contain [char]s
+      word_toset = set(word)
+      if required in word_toset and (4 <= len(word) <= 19):
+        if word in solution_set:
+          found_words.add(word)
+          points_earned += game.get_word_points(word)
+      if points_earned >= goal_points:
+        found_words_lst = list(found_words)
+        return (found_words_lst, points_earned)
+    if precomputation == 4: # Given, every word in dict is a potential solution
+      if word in solution_set:
+          found_words.add(word)
+          points_earned += game.get_word_points(word)
+      if points_earned >= goal_points:
+        found_words_lst = list(found_words)
+        return (found_words_lst, points_earned)
+  # dicts cannot contain every solution
+  found_words_lst = list(found_words)
+  return (found_words_lst, points_earned)
+
+  
+
+
+## Deprecated
+"""
 def build_wordnet_dict():
   word_set = set()
   for syn in wn.all_synsets():
@@ -116,6 +203,4 @@ def stop_at_success(chars, soln, goal_points):
       if (total_points >= goal_points):
         return soln_words, total_points
   return [], -1 #indicates we don't have the correct words in wordnet, unlikely
-
-
-
+"""

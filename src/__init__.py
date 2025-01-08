@@ -26,7 +26,7 @@ solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimi
 def plot_sep(stacks, alg_name, colors):
   fig, axs = plt.subplots(2, 2, sharex = True)
   if len(alg_name) == 1:
-    fig.suptitle(alg_name + ' Statistics')
+    fig.suptitle(alg_name[0] + ' Statistics')
   else:
     fig.suptitle('Multiple Model Statistics')
   for i in range(0, len(stacks)):
@@ -70,7 +70,7 @@ def benchmark_bf(bf_alg, data, solution, priority = None):
       point_vals[r] += point_val
       time_vals[r] += time_val
       num_words = len(words)
-      avg_words_used[r] = num_words
+      avg_words_used[r] += num_words
       word_lengths = [len(w) for w in words]
       avg_word_length[r] += sum(word_lengths) / num_words
 
@@ -88,7 +88,61 @@ def plot_bf_differences():
   plot_sep(both_stacks, titles, color_lst)
 
 
+def benchmark_df(df_alg, data, solution, precompute, dicts):
+  time_vals = np.zeros(9)
+  point_vals = np.zeros(9)
+  avg_word_length = np.zeros(9)
+  avg_words_used = np.zeros(9)
+  for i in range(0, len(data)):
+    game = data[i]
+    solns = solution[i]
+    for r in range(1, 9):
+      words, point_val, time_val = g.use_df(df_alg, game, solns, r, precompute, dicts[i])
+      point_vals[r] += point_val
+      time_vals[r] += time_val
+      num_words = len(words)
+      avg_words_used[r] += num_words
+      word_lengths = [len(w) for w in words]
+      avg_word_length[r] += sum(word_lengths) / num_words
+  return np.stack((avg_word_length / len(data), avg_words_used / len(data), 
+                    point_vals / len(data), time_vals / len(data)))
 
+
+
+precomputations = [0, 1, 2, 3, 4]
+def plot_naive_precomps():
+  zero_dicts = [None] * len(data)
+  one_dicts = []
+  two_dicts = []
+  three_dicts = []
+  four_dicts = []
+  for i in data:
+    one_dicts.append(df.build_wordnet_dict(0, i))
+    two_dicts.append(df.build_wordnet_dict(0, i))
+    three_dicts.append(df.build_wordnet_dict(0, i))
+    four_dicts.append(df.build_wordnet_dict(0, i))
+  s0 = benchmark_df(df.naive_df, data, solutions, 0, zero_dicts)
+  s1 = benchmark_df(df.naive_df, data, solutions, 1, one_dicts)
+  s2 = benchmark_df(df.naive_df, data, solutions, 2, two_dicts)
+  s3 = benchmark_df(df.naive_df, data, solutions, 3, three_dicts)
+  s4 = benchmark_df(df.naive_df, data, solutions, 4, four_dicts)
+  all_stacks = [s0, s1, s2, s3, s4]
+  titles = ['Naive w/ Precomp 0', 'Naive w/ Precomp 1', 'Naive w/ Precomp 2', 
+            'Naive w/ Precomp 3', 'Naive w/ Precomp 4']
+  color_lst = ['b', 'r', 'g', 'm', 'y']
+  plot_sep(all_stacks, titles, color_lst)
+
+
+# All Plots: 
+# s = benchmark_bf(bf.naive_bf, data, solutions)
+# plot_sep([s], ['Naive Brute Force'], ['b'])
+# plot_bf_differences()
+# plot_naive_precomps()
+
+
+
+def plot_df_differences():
+  return
 
 
 

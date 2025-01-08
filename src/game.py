@@ -2,6 +2,7 @@ import csv
 import time
 import TrieNode as tn
 import greedy as g
+import dictionary_filter as df
 # data: 2D list of characters, s.t. data[i][0] = day i's center letter, and 
 # data[i][1:7] = day i's outer letters
 # data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = ' '))
@@ -83,6 +84,20 @@ def use_bf(bf_alg, chars, soln, rank, priority = None):
     words, points = bf_alg(chars, soln, rank_points, priority)
     end = time.time()
   return words, points, end - start
+
+def use_df(df_alg, chars, soln, rank, precomputation, dict = None):
+  total_possible = count_total_points(soln)
+  rank_points = round(rank_percentages[rank] * total_possible)
+  if dict is None:
+    start = time.time()
+    words, points = df_alg(chars, soln, rank_points, precomputation)
+    end = time.time()
+  else:
+    start = time.time()
+    words, points = df_alg(chars, soln, rank_points, precomputation, dict)
+    end = time.time()
+  return words, points, end - start
+
 
 
 
