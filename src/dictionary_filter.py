@@ -1,8 +1,4 @@
-import nltk
-from nltk.corpus import wordnet as wn
-from nltk.corpus import words
 import game
-import string
 import re
 # Second: Dictionary Filtering, starting with the "entire" dictionary, and filtering
 # words based on the rules of the game

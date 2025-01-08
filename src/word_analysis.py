@@ -34,6 +34,65 @@ def generate_cur_corpus():
 
 curated_corpus = open('src/data/words_cur.txt', 'r')
 
+def filter_pangrams(dict_set):
+  remove_these = set()
+  vowel_no_y = set(('a', 'e', 'i', 'o', 'u'))
+  for i in dict_set:
+    chars = set(i)
+    if len(chars) == 7:
+      if len(chars.intersection(vowel_no_y)) < 2 or len(chars.intersection(vowel_no_y.union(set('y')))) > 3:
+        remove_these.add(i)
+    else:
+      num_chars = len(chars)
+      num_v_noy = len(chars.intersection(vowel_no_y))
+      num_v_y = len(chars.intersection(vowel_no_y.union(set('y'))))
+      if num_v_y > 3:
+        remove_these.add(i)
+      elif num_chars == 6 and num_v_noy == 0:
+        remove_these.add(i)
+  return remove_these
+
+
+def cur_corpus_further(corpus_file):
+  too_big = set()
+  remove_these = set()
+  for i in corpus_file:
+    too_big.add(i[:-1])
+  data_set_list = []
+  solutions_set_list = []
+  required_list = []
+  for i in range(0, len(data)):
+    chars_set = set(data[i])
+    filter = set(solutions[i])
+    required = data[i][0]
+    data_set_list.append(chars_set)
+    solutions_set_list.append(filter)
+    required_list.append(required)
+  for word in too_big:
+    word_set = set(word) 
+    if word_set in data_set_list:
+      game = data_set_list.index(word_set)
+      need = required_list[game]
+      if need in word_set:
+        if word not in solutions_set_list[game]:
+          remove_these.add(word) # Remove objectively obscure words
+  bad_pangrams = filter_pangrams(too_big)
+  for rmv in bad_pangrams:
+    remove_these.add(rmv)
+  for elt in remove_these:
+    too_big.remove(elt)
+  with open('src/data/words_cur_further.txt', 'w') as new:
+    for elt in too_big:
+      new.write(elt + '\n')
+
+cur_corpus_further(curated_corpus)
+further_cur_corpus = open('src/data/words_cur_further.txt', 'r')
+      
+
+    
+
+
+
 def find_dists(words):
   len_dist = np.zeros(20)
   pg_dist = np.zeros(20)
@@ -80,12 +139,11 @@ def plot_word_info(words):
   ax[1].set_ylabel('P[Length <= X]')
   ax[1].set_xticks(np.arange(0, 21, 1))
 
-  print(len_probs, pg_probs)
-  for i in range(0, 20):
-    print("%i & %f & %f & %f \\\\" %(i, len_probs[i] + pg_probs[i], 
-                                     len_cdf[i] + pg_cdf[i], p_pangram_given_length[i]))
-
   plt.show()
+
+
+
+# Plotting Stuff, all completed and saved
 
 
 # given_solns = set()
@@ -94,20 +152,4 @@ def plot_word_info(words):
 #     given_solns.add(j + '\n')
 # plot_word_info(given_solns) -> Already Plotted and Saved
 # plot_word_info(curated_corpus) -> Already Plotted and Saved
-
-
-"""
-y_axis =  find_total_dist()
-total_potential_words = np.sum(y_axis)
-probabilities = np.zeros(20)
-for i in range(0, 20):
-  probabilities[i] = y_axis[0:i+ 1].sum(axis = 0)
-probabilities = probabilities / total_potential_words
-y_prime_axis = y_axis / total_potential_words
-plt.bar(x_axis, y_prime_axis)               
-plt.xticks(np.arange(0, 21, 1)) 
-plt.xlabel('Number of Characters')
-plt.ylabel('Probability of Potential Solution Words Being Length x')
-plt.title('Probability of Potential Solution Words by Length')
-plt.show()
-"""
+# plot_word_info(further_cur_corpus)
