@@ -1,3 +1,7 @@
 venv/
 downloading.py
 src/__pycache__
+src/data/out_bees.csv
+src/data/out_solns.csv
+src/data/words_cur_further.txt
+src/data/words_cur.txt
