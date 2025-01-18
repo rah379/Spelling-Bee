@@ -78,7 +78,7 @@ def benchmark_bf(bf_alg, data, solution, priority = None):
 
 def plot_bf_differences():
   naive_bf_stack = benchmark_bf(bf.naive_bf, data, solutions)
-  length_priority = [5, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  length_priority = [6, 5, 7, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   optimized_bf_stack = benchmark_bf(bf.optimized_bf, data, solutions, length_priority)
   both_stacks = [naive_bf_stack, optimized_bf_stack]
   titles = ['Naive BF', 'Optimized BF']
@@ -133,5 +133,5 @@ def plot_naive_precomps():
 # All Plots: 
 # s = benchmark_bf(bf.naive_bf, data, solutions)
 # plot_sep([s], ['Naive Brute Force'], ['b'])
-# plot_bf_differences()
+plot_bf_differences()
 # plot_naive_precomps()
