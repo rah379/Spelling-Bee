@@ -3,9 +3,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import string
 import re
+import random
+import enchant
+from obscure_words import load_obscure_words
+from nltk.corpus import words
+
+d = enchant.Dict("en_US")
+d_2 = set(words.words())
+obscure_dict = load_obscure_words()
 
 data = list(csv.reader(open('src/data/letters.csv', newline = ''), delimiter = ' '))
 solutions = list(csv.reader(open('src/data/solutions.csv', newline = ''), delimiter = ' '))
+
 
 x_axis = np.linspace(0, 19, 20)
 def generate_cur_corpus():
@@ -79,17 +88,53 @@ def cur_corpus_further(corpus_file):
   bad_pangrams = filter_pangrams(too_big)
   for rmv in bad_pangrams:
     remove_these.add(rmv)
+  obsc_pangram_set = set()
+  obsc_others_set = set()
+  for game in solutions:
+    for word in game:
+      if word in obscure_dict:
+        if len(set(word)) == 7: # pangram
+          obsc_pangram_set.add(word)
+        else: # not a pangram
+          obsc_others_set.add(word)
+  all_obsc_pangrams = set()
+  all_obsc_words = set()
+  for obsc_word in obscure_dict:
+    if len(set(obsc_word)) < 8: # valid solution word
+      if len(set(obsc_word)) == 7: # pangram
+        all_obsc_pangrams.add(obsc_word)
+      else:
+        all_obsc_words.add(obsc_word)
+  pangram_rand_rat = len(obsc_pangram_set) / len(all_obsc_pangrams)
+  others_rand_rat = len(obsc_others_set) / len(all_obsc_words)
+  for elt in too_big:
+    if elt in obscure_dict:
+      rand = random.random()
+      if len(set(elt)) == 7: # elt is a pangram
+        if rand > pangram_rand_rat:
+          remove_these.add(elt)
+      else: 
+        if rand > others_rand_rat:
+          remove_these.add(elt)
+  for elt in too_big:
+    rand = random.random()
+    if not d.check(elt) and elt not in d_2:
+      if rand > (31/589):
+        remove_these.add(elt)
+    elif not d.check(elt):
+      if rand > (40/589):
+        remove_these.add(elt)
+    elif elt not in d_2:
+      if rand > (86/589):
+        remove_these.add(elt)
   for elt in remove_these:
     too_big.remove(elt)
   with open('src/data/words_cur_further.txt', 'w') as new:
     for elt in too_big:
       new.write(elt + '\n')
 
-cur_corpus_further(curated_corpus)
+# cur_corpus_further(curated_corpus)
 further_cur_corpus = open('src/data/words_cur_further.txt', 'r')
-      
-
-    
 
 
 
